@@ -26,11 +26,6 @@ environment variable.
 EOF
 }
 
-error() {
-	echo "$msg" >&2
-	exit 1
-}
-
 TEMP=`getopt -o dhs --long help -n calc -- "$@"`
 eval set -- "$TEMP"
 
@@ -42,7 +37,7 @@ while true; do
 	-d) shift; force_dec=1 ;;
 	-h) shift; force_hex=1 ;;
 	--) shift; break ;;
-	*) error "getopt failed" ;;
+	*) echo "getopt failed" >&2; exit 1 ;;
 	esac
 done
 
