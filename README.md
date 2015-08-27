@@ -11,18 +11,15 @@ The equation can have intermixed hex and decimal values.
 Usage: calc [OPTION]... [EQUATION]
 Solve an equation.
     -d        output in decimal even if EQUATION contains hex numbers
-        -h        output in hex even if EQUATION contains decimal numbers
-	    --help    display this text and exit
+    -h        output in hex even if EQUATION contains decimal numbers
+    --help    display this text and exit
 
-	    EQUATION may contain hex numbers so long as they are preceded by
-	    '0x'.
-	    If EQUATION contains a hex number, the output will be in hex if -d
-	    is not given.
-	    See `man bc` for legal EQUATION operators.
+    EQUATION may contain hex numbers so long as they are preceded by '0x'.
+    If EQUATION contains a hex number, the output will be in hex if -d is not given.
+    See `man bc` for legal EQUATION operators.
 
-	    Default precision is 15 digits. It can be overidden by setting the
-	    $PRECISION
-	    environment variable.
+    Default precision is 15 digits. It can be overidden by setting the
+    $PRECISION environment variable.
 ```
 
 
