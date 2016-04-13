@@ -11,7 +11,7 @@ PRECISION=${PRECISION:-15} # Allow env based override of precision
 
 usage() {
 	cat << EOF
-Usage: `basename $0` [OPTION]... [EQUATION]
+Usage: $(basename "$0") [OPTION]... [EQUATION]
 Solve an equation.
     -d        output in decimal even if EQUATION contains hex numbers
     -h        output in hex even if EQUATION contains decimal numbers
@@ -26,7 +26,7 @@ environment variable.
 EOF
 }
 
-TEMP=`getopt -o dhs --long help -n calc -- "$@"`
+TEMP=$(getopt -o dhs --long help -n calc -- "$@")
 eval set -- "$TEMP"
 
 force_dec=0
@@ -47,29 +47,34 @@ if [ $force_hex -eq 1 ] && [ $# -eq 0 ]; then
 	exit 0
 fi
 
-equation="$@"
+piped_input=
+if [ ! -t 0 ]; then
+	read piped_input
+fi
+
+equation="$piped_input $*"
 hex_num=''
 while [[ "$equation" =~ (0x[0-9a-fA-F]+) ]]; do
 	hex_num=${BASH_REMATCH[0]}
-	dec_repl=`printf "%d\n" $hex_num`
+	dec_repl=$(printf "%d\n" "$hex_num")
 	equation=${equation/$hex_num/$dec_repl}
 done
 
 # bc can't handle fractional exponents so convert these to e(exp*l(base))
-equation=`echo "$equation" | sed -r 's/([0-9]+)\^([0-9]*\.[0-9]+|\([^\)]+\))/e(\2*l(\1))/g'`
+equation=$(echo "$equation" | sed -r 's/([0-9]+)\^([0-9]*\.[0-9]+|\([^\)]+\))/e(\2*l(\1))/g')
 
-if [ $PRECISION -gt 15 ]; then
+if [ "$PRECISION" -gt 15 ]; then
 	# High precision hack (%g can only handle 15 digits)
-	result=`bc -l <<< "scale=$PRECISION; $equation" | tr -d '\\n\\\'`
+	result=$(bc -l <<< "scale=$PRECISION; $equation" | tr -d '\n')
 else
-	result=`bc -l <<< "scale=$PRECISION; $equation" | \
-		awk '{printf "%.'"$PRECISION"'g\n", $0}'`
+	result=$(bc -l <<< "scale=$PRECISION; $equation" | \
+		 awk '{printf "%.'"$PRECISION"'g\n", $0}')
 fi
 
 if [[ $force_dec -eq 0 && -n "$hex_num" || $force_hex -eq 1 ]]; then
 	# Output using same casing as given (or upper if mixed)
 	[[ "$@" =~ [A-F] ]] && x="X" || x="x"
-	printf "0x%$x\n" $result
+	printf "0x%$x\n" "$result"
 else
-	echo $result
+	echo "$result"
 fi
